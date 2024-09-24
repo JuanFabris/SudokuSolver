@@ -2,9 +2,9 @@ document.addEventListener('DOMContentLoaded', function () {
     const gridSize = 9;
     const solveButton = document.getElementById("solve-btn");
     solveButton.addEventListener('click', solveSudoku);
-    
+
     const resetButton = document.getElementById("reset-btn");
-    resetButton.addEventListener('click', resetSudoku); // Corrected to use resetButton
+    resetButton.addEventListener('click', resetSudoku);
 
     const sudokuGrid = document.getElementById("sudoku-grid");
     // Create the sudoku grid and input cells
@@ -16,8 +16,6 @@ document.addEventListener('DOMContentLoaded', function () {
             input.type = "number";
             input.className = "cell";
             input.id = `cell-${row}-${col}`;
-            input.min = 1; // Set min value
-            input.max = 9; // Set max value
             cell.appendChild(input);
             newRow.appendChild(cell);
         }
@@ -39,8 +37,14 @@ async function solveSudoku() {
         }
     }
 
-    // Check for invalid inputs and highlight them
-    const invalidInputs = [];
+    // Validate the Sudoku input before solving
+    if (!isValidSudokuInput(sudokuArray)) {
+        alert("Controlla i valori inseriti.");
+        invalidInputs.forEach(id => document.getElementById(id).style.backgroundColor = "red");
+        return; // Exit if input is invalid
+    }
+
+    // Identify user-input cells and mark them
     for (let row = 0; row < gridSize; row++) {
         for (let col = 0; col < gridSize; col++) {
             const cellId = `cell-${row}-${col}`;
@@ -48,18 +52,8 @@ async function solveSudoku() {
 
             if (sudokuArray[row][col] !== 0) {
                 cell.classList.add("user-input");
-                if (sudokuArray[row].filter(x => x === sudokuArray[row][col]).length > 1) {
-                    invalidInputs.push(cellId);
-                }
             }
         }
-    }
-
-    // If there are invalid inputs, alert the user and return
-    if (invalidInputs.length > 0) {
-        alert("Errore nell'inserimento dei numeri");
-        invalidInputs.forEach(id => document.getElementById(id).style.backgroundColor = "red");
-        return;
     }
 
     // Solve the sudoku and display the solution
@@ -78,8 +72,37 @@ async function solveSudoku() {
             }
         }
     } else {
-        alert("Nessuna soluzione trovata");
+        alert("Nessuna soluzione trovata.");
     }
+}
+
+function isValidSudokuInput(board) {
+    const gridSize = 9;
+
+    // Check rows and columns for duplicates
+    for (let i = 0; i < gridSize; i++) {
+        const rowSet = new Set();
+        const colSet = new Set();
+        for (let j = 0; j < gridSize; j++) {
+            // Validate rows
+            if (board[i][j] !== 0) {
+                if (rowSet.has(board[i][j])) {
+                    return false; // Duplicate found in row
+                }
+                rowSet.add(board[i][j]);
+            }
+
+            // Validate columns
+            if (board[j][i] !== 0) {
+                if (colSet.has(board[j][i])) {
+                    return false; // Duplicate found in column
+                }
+                colSet.add(board[j][i]);
+            }
+        }
+    }
+    
+    return true; // All checks passed
 }
 
 function solveSudokuHelper(board) {
@@ -118,7 +141,7 @@ function isValidMove(board, row, col, num) {
         }
     }
 
-    // Check the 3*3 subgrid for conflicts
+    // Check the 3x3 subgrid for conflicts
     const startRow = Math.floor(row / 3) * 3;
     const startCol = Math.floor(col / 3) * 3;
 
@@ -137,16 +160,14 @@ function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-// Function to reset the Sudoku grid
 function resetSudoku() {
     const gridSize = 9;
     for (let row = 0; row < gridSize; row++) {
         for (let col = 0; col < gridSize; col++) {
             const cellId = `cell-${row}-${col}`;
             const cell = document.getElementById(cellId);
-            cell.value = ''; // Clear input
-            cell.classList.remove("user-input", "solved"); // Remove classes
-            cell.style.backgroundColor = ""; // Reset background color
+            cell.value = ""; // Clear the input field
+            cell.classList.remove("solved", "user-input"); // Remove styles
         }
     }
 }

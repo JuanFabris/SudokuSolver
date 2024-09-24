@@ -94,3 +94,7 @@ button:hover {
     background-color: #9ccc65;
     transition: all 0.2s ease-in-out;
 }
+
+.invalid {
+    background-color: red; /* Highlight invalid cells in red */
+}
